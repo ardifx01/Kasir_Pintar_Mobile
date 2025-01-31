@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kasir_pintar/config.dart';
 
 class StoreCard extends StatelessWidget {
   final String name;
@@ -41,7 +42,7 @@ class StoreCard extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               child: urlImage != null
                   ? Image.network(
-                      urlImage!,
+                      Config.imageUrl + urlImage!,
                       height: 150,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -211,21 +212,21 @@ class StoreGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: EdgeInsets.all(8),
+      padding: EdgeInsets.all(16),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 2 : 1,
-        childAspectRatio: 1.2,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.75,
       ),
       itemCount: stores.length,
       itemBuilder: (context, index) {
         final store = stores[index];
         return StoreCard(
-          name: store['name'],
-          numberPhone: store['number_phone'],
-          postalCode: store['postal_code'],
-          address: store['address'],
+          name: store['name'] ?? '',
+          numberPhone: store['number_phone'] ?? '',
+          postalCode: store['postal_code'] ?? '',
+          address: store['address'] ?? '',
           urlImage: store['url_image'],
           onTap: () => onStoreSelected?.call(store),
           onEdit: () => onEditStore?.call(store),
@@ -236,39 +237,24 @@ class StoreGrid extends StatelessWidget {
   }
 }
 
-// staff card
-import 'package:flutter/material.dart';
-
 class StaffCard extends StatelessWidget {
-  final int storeId;
-  final int userId;
-  final String role;
-  final String name;
-  final String email;
-  final String numberPhone;
-  final String? imageUrl;
-  final VoidCallback? onTap;
+  final Map<String, dynamic> staff;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
   const StaffCard({
     Key? key,
-    required this.storeId,
-    required this.userId,
-    required this.role,
-    required this.name,
-    required this.email,
-    required this.numberPhone,
-    this.imageUrl,
-    this.onTap,
+    required this.staff,
     this.onEdit,
     this.onDelete,
   }) : super(key: key);
 
   Color _getRoleColor() {
-    switch (role.toLowerCase()) {
+    switch (staff['role'].toString().toLowerCase()) {
       case 'owner':
         return Colors.orange;
+      case 'admin':
+        return Colors.purple;
       case 'staff':
         return Colors.blue;
       default:
@@ -278,6 +264,9 @@ class StaffCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = staff['user'] as Map<String, dynamic>;
+    final store = staff['store'] as Map<String, dynamic>;
+
     return Card(
       elevation: 2,
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -288,191 +277,130 @@ class StaffCard extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Profile Image
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: _getRoleColor(),
-                    width: 2,
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: imageUrl != null
-                      ? Image.network(
-                          imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Icon(
-                            Icons.person,
-                            size: 30,
-                            color: Colors.grey[400],
-                          ),
-                        )
-                      : CircleAvatar(
-                          backgroundColor: Colors.grey[200],
-                          child: Text(
-                            name.isNotEmpty ? name[0].toUpperCase() : '?',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Profile Image
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: _getRoleColor().withOpacity(0.1),
+              child: Text(
+                user['name'][0].toUpperCase(),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: _getRoleColor(),
                 ),
               ),
-              SizedBox(width: 16),
+            ),
+            SizedBox(width: 16),
 
-              // Staff Information
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Name and Role
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+            // Staff Information
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          user['name'],
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getRoleColor().withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          staff['role'].toString().toUpperCase(),
+                          style: TextStyle(
+                            color: _getRoleColor(),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getRoleColor().withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            role.toUpperCase(),
-                            style: TextStyle(
-                              color: _getRoleColor(),
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    store['name'],
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
                     ),
-                    SizedBox(height: 4),
-
-                    // Email
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.email_outlined,
-                          size: 14,
-                          color: Colors.grey[600],
-                        ),
-                        SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            email,
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 4),
-
-                    // Phone Number
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.phone_outlined,
-                          size: 14,
-                          color: Colors.grey[600],
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          numberPhone,
+                  ),
+                  SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.email_outlined,
+                          size: 14, color: Colors.grey[600]),
+                      SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          user['email'],
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 14,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // Action Buttons
-              Column(
-                children: [
-                  if (onEdit != null)
-                    IconButton(
-                      icon: Icon(
-                        Icons.edit_outlined,
-                        color: Colors.blue,
-                        size: 20,
                       ),
-                      onPressed: onEdit,
-                      tooltip: 'Edit Staff',
-                    ),
-                  if (onDelete != null)
-                    IconButton(
-                      icon: Icon(
-                        Icons.delete_outline,
-                        color: Colors.red,
-                        size: 20,
+                    ],
+                  ),
+                  SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.phone_outlined,
+                          size: 14, color: Colors.grey[600]),
+                      SizedBox(width: 4),
+                      Text(
+                        user['number_phone'] ?? '-',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
                       ),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('Delete Staff'),
-                            content: Text(
-                                'Are you sure you want to delete this staff member?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  onDelete?.call();
-                                },
-                                child: Text(
-                                  'Delete',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      tooltip: 'Delete Staff',
-                    ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+
+            // Actions
+            Column(
+              children: [
+                if (onEdit != null)
+                  IconButton(
+                    icon:
+                        Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                    onPressed: onEdit,
+                    tooltip: 'Edit Staff',
+                  ),
+                if (onDelete != null)
+                  IconButton(
+                    icon:
+                        Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                    onPressed: onDelete,
+                    tooltip: 'Delete Staff',
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -482,14 +410,12 @@ class StaffCard extends StatelessWidget {
 // Staff List Component
 class StaffList extends StatelessWidget {
   final List<Map<String, dynamic>> staffList;
-  final Function(Map<String, dynamic>)? onStaffSelected;
   final Function(Map<String, dynamic>)? onEditStaff;
   final Function(Map<String, dynamic>)? onDeleteStaff;
 
   const StaffList({
     Key? key,
     required this.staffList,
-    this.onStaffSelected,
     this.onEditStaff,
     this.onDeleteStaff,
   }) : super(key: key);
@@ -501,24 +427,14 @@ class StaffList extends StatelessWidget {
       itemBuilder: (context, index) {
         final staff = staffList[index];
         return StaffCard(
-          storeId: staff['store_id'],
-          userId: staff['user_id'],
-          role: staff['role'],
-          name: staff['name'],
-          email: staff['email'],
-          numberPhone: staff['number_phone'],
-          imageUrl: staff['image_url'],
-          onTap: () => onStaffSelected?.call(staff),
-          onEdit: () => onEditStaff?.call(staff),
-          onDelete: () => onDeleteStaff?.call(staff),
+          staff: staff,
+          onEdit: onEditStaff != null ? () => onEditStaff!(staff) : null,
+          onDelete: onDeleteStaff != null ? () => onDeleteStaff!(staff) : null,
         );
       },
     );
   }
 }
-
-
-import 'package:flutter/material.dart';
 
 enum ContactType { customer, supplier }
 
@@ -550,7 +466,8 @@ class ContactCard extends StatelessWidget {
     return type == ContactType.customer ? Colors.blue : Colors.green;
   }
 
-  String get _typeText => type == ContactType.customer ? 'Customer' : 'Supplier';
+  String get _typeText =>
+      type == ContactType.customer ? 'Customer' : 'Supplier';
 
   @override
   Widget build(BuildContext context) {
@@ -678,7 +595,8 @@ class ContactCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Delete ${_typeText}'),
-        content: Text('Are you sure you want to delete this ${_typeText.toLowerCase()}?'),
+        content: Text(
+            'Are you sure you want to delete this ${_typeText.toLowerCase()}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

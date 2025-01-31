@@ -107,7 +107,7 @@ class LabeledInput extends StatelessWidget {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: Theme.of(context).primaryColor,
+                    color: Colors.blue,
                     width: 2,
                   ),
                 ),

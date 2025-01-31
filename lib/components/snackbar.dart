@@ -1,4 +1,3 @@
-// lib/utils/snackbar_util.dart
 import 'package:flutter/material.dart';
 
 enum SnackBarType { success, warning, error, info }

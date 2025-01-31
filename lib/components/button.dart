@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-enum ButtonStyleType { green, yellow, red }
+enum ButtonStyleType { green, yellow, red, black }
 
 class Button extends StatelessWidget {
   final String text;
   final ButtonStyleType styleType;
-  final VoidCallback onPressed;
+  final dynamic onPressed;
 
   const Button({
     Key? key,
@@ -17,14 +17,23 @@ class Button extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity, // Memenuhi lebar layar
+      width: double.infinity,
       child: ElevatedButton(
         style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(_getButtonColor(styleType)),
+          backgroundColor:
+              MaterialStateProperty.all(_getButtonColor(styleType)),
           padding:
-              WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 16.0)),
+              MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 16.0)),
         ),
-        onPressed: onPressed,
+        onPressed: onPressed == null
+            ? null
+            : () async {
+                if (onPressed is Future Function()) {
+                  await onPressed();
+                } else {
+                  onPressed();
+                }
+              },
         child: Text(
           text,
           style: TextStyle(color: Colors.white),
@@ -41,6 +50,8 @@ class Button extends StatelessWidget {
         return Colors.yellow;
       case ButtonStyleType.red:
         return Colors.red;
+      case ButtonStyleType.black:
+        return Colors.black;
       default:
         return Colors.blue;
     }

@@ -28,9 +28,7 @@ class _LoginViewState extends State<LoginView> {
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
-      final message = responseData['message'];
       final accessToken = responseData['access_token'];
-      final tokenType = responseData['token_type'];
       final user = responseData['user'];
       final userId = user['id'];
       final userRole = user['role'];
@@ -82,6 +80,15 @@ class _LoginViewState extends State<LoginView> {
             PasswordInput(
               label: 'Password',
               controller: _passwordController,
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/forgot_password');
+                },
+                child: Text('Lupa Password?'),
+              ),
             ),
             Button(
               text: 'Login',
